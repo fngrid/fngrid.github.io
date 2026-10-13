@@ -36,7 +36,7 @@ const Approval: React.FC = () => {
         </div>
         <div style={{fontFamily: mono, fontSize: 21, color: C.text, marginTop: 6}}>delete_app × 5</div>
         <div style={{fontFamily: sans, fontSize: 18, color: C.text2, marginTop: 4}}>
-          waitlist, status, crm-lite, invoices, webhook-relay · saves $5/mo
+          waitlist, status, crm-lite, invoices, webhook-relay · saves $2.50/mo
         </div>
       </div>
       {approved ? (
@@ -114,7 +114,7 @@ export const Shutdown: React.FC = () => {
       n={4}
       eyebrow="shut down"
       title="Gone in one approval."
-      sub="Keep what matters, delete the rest. Your agent asks first, and the bill drops back to the base fee."
+      sub="Keep what matters, delete the rest. Your agent asks first, and the bill follows."
     >
       <Terminal title="agent session" right="8 apps" fontSize={21} lineHeight={32}>
         <Prompt text="keep recipes, docs-site and blog. shut the rest down" at={8} />

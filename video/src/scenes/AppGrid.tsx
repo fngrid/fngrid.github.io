@@ -60,8 +60,8 @@ export const AppGrid: React.FC<{cells: CellView[]; h?: number}> = ({cells, h}) =
 );
 
 export const Meter: React.FC<{apps: number}> = ({apps}) => {
-  const extra = Math.max(0, apps - 3);
-  const price = 5 + extra;
+  const price = 5 + apps * 0.5;
+  const money = (n: number) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
   return (
     <div
       style={{
@@ -79,10 +79,10 @@ export const Meter: React.FC<{apps: number}> = ({apps}) => {
         color: C.text2,
       }}
     >
-      <span style={{color: C.text}}>{apps} apps</span>
-      <span>3 included</span>
-      <span>{extra} × $1/mo</span>
-      <span style={{color: C.text}}>${price}/mo + usage</span>
+      <span style={{color: C.text}}>{apps} live apps</span>
+      <span>{apps} × $0.50</span>
+      <span>$5 base</span>
+      <span style={{color: C.text}}>{money(price)}/mo + usage</span>
     </div>
   );
 };

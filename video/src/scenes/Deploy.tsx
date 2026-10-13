@@ -90,7 +90,7 @@ export const Deploy: React.FC = () => (
         <div style={{color: C.flow, fontSize: 20, marginTop: 6}}>example.com/claim/k3x9</div>
       </Reveal>
       <Reveal at={352} style={{marginTop: 18, color: C.signal}}>
-        {'✓ claimed   $20 credit added · 3 apps included'}
+        {'✓ claimed   $20 credit added · $5/mo, $1 of usage included'}
       </Reveal>
     </Terminal>
   </SceneFrame>
