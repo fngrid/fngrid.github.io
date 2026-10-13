@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fngrid: hosting your agent can drive</title>
+<meta name="description" content="A concept demo of fngrid, app hosting that a coding agent can drive end to end. Watch the walkthrough and tell us what you'd need.">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="fngrid: your agent ships it. And fixes it.">
+<meta property="og:description" content="A concept demo of app hosting a coding agent can drive. Watch the 75-second walkthrough and tell us what you'd need.">
+<meta property="og:image" content="https://fngrid.github.io/assets/og.png">
+<meta property="og:url" content="https://fngrid.github.io/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="color-scheme" content="dark light">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>
+  // set the theme before first paint
+  try { var t = localStorage.getItem('fngrid-theme'); if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t); } catch (e) {}
+</script>
+<style>
+:root {
+  --ink-950: #07080A; --ink-900: #0C0E11; --ink-800: #12151A;
+  --line: #232830; --line-strong: #323945;
+  --text: #E6EAF0; --text-2: #9AA4B2; --text-3: #7A8595;
+  --signal: #C8FF3D; --signal-text: #C8FF3D; --on-signal: #07080A;
+  --flow: #3DD9FF; --warn: #FFB020; --error: #FF5C5C;
+  --signal-12: rgba(200,255,61,.12); --signal-06: rgba(200,255,61,.06);
+  --sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --ink-950: #F6F7F4; --ink-900: #FFFFFF; --ink-800: #EEF0EA;
+  --line: #E2E5DE; --line-strong: #C9CEC4;
+  --text: #0C0E11; --text-2: #4A5361; --text-3: #667080;
+  --signal-text: #3F6B00; --on-signal: #07080A; --flow: #006C8A; --warn: #8A5300; --error: #B3261E;
+  --signal-12: rgba(200,255,61,.45); --signal-06: rgba(200,255,61,.2);
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+body { margin: 0; background: var(--ink-950); color: var(--text); font: 400 15px/24px var(--sans); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 2px; }
+:root[data-theme="light"] :focus-visible { outline-color: #3F6B00; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.mono { font-family: var(--mono); }
+.eyebrow { font: 500 12px/16px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin: 0 0 12px; }
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.04em; }
+h2 { font-size: 32px; line-height: 38px; }
+h3 { font-size: 20px; line-height: 28px; letter-spacing: -0.02em; }
+.lead { font-size: 18px; line-height: 28px; color: var(--text-2); max-width: 600px; margin: 12px 0 0; }
+section { border-bottom: 1px solid var(--line); }
+.sec { padding: 96px 0; }
+@media (max-width: 640px) { .sec { padding: 64px 0; } h2 { font-size: 28px; line-height: 34px; } }
+
+/* nav */
+.nav { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--ink-950) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.nav .wrap { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-r { display: flex; align-items: center; gap: 20px; font-size: 14px; color: var(--text-2); }
+.nav-r a.l { text-decoration: none; }
+.nav-r .m { display: none; }
+@media (max-width: 640px) { .nav-r .d { display: none; } .nav-r .m { display: inline; } }
+.nav-r a.l:hover { color: var(--text); }
+@media (max-width: 640px) { .nav-r a.l { display: none; } }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 40px; padding: 0 18px; border-radius: 8px; font: 500 15px/1 var(--sans); text-decoration: none; cursor: pointer; border: 1px solid transparent; }
+.btn-primary { background: var(--signal); color: var(--on-signal); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-primary[disabled] { opacity: .6; cursor: progress; }
+.btn-secondary { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn-secondary:hover { background: var(--ink-800); }
+.btn-sm { height: 32px; padding: 0 14px; font-size: 14px; }
+.icon-btn { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--line-strong); background: transparent; color: var(--text-2); cursor: pointer; }
+.icon-btn:hover { background: var(--ink-800); color: var(--text); }
+@media (max-width: 640px) { .btn, .icon-btn { min-height: 44px; } .icon-btn { width: 44px; } .btn-sm { height: 44px; } }
+
+/* hero */
+.hero { position: relative; overflow: hidden;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px; background-position: center top; }
+.hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 30%, transparent 0%, color-mix(in srgb, var(--ink-950) 20%, transparent) 35%, var(--ink-950) 80%); pointer-events: none; }
+.hero .wrap { position: relative; padding-top: 96px; padding-bottom: 80px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 28px; }
+.badge { display: inline-flex; align-items: center; gap: 8px; min-height: 28px; padding: 4px 12px; border: 1px solid var(--line-strong); background: var(--ink-900); border-radius: 4px; font: 400 12px/16px var(--mono); color: var(--text-2); }
+.badge .dot { color: var(--signal-text); }
+h1 { font-size: clamp(40px, 7vw, 72px); line-height: 1; max-width: 900px; }
+.hero .sub { max-width: 560px; font-size: 18px; line-height: 28px; color: var(--text-2); margin: 0; }
+.ctas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+.player { width: 100%; max-width: 960px; margin-top: 16px; text-align: left; background: var(--ink-900); border: 1px solid var(--line-strong); border-radius: 12px; overflow: hidden; box-shadow: 0 0 160px rgba(200,255,61,.07); }
+.player-h { height: 36px; padding: 0 16px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; font: 400 12px/16px var(--mono); color: var(--text-3); }
+.player video { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; background: #07080A; }
+.chapters { display: flex; flex-wrap: wrap; border-top: 1px solid var(--line); }
+.chapters button { flex: 1 1 140px; display: flex; flex-direction: column; gap: 2px; align-items: flex-start; text-align: left; padding: 12px 16px; min-height: 56px; background: transparent; color: var(--text-2); border: 0; border-right: 1px solid var(--line); font: 400 13px/20px var(--sans); cursor: pointer; }
+.chapters button:last-child { border-right: 0; }
+.chapters button:hover { background: var(--ink-800); color: var(--text); }
+.chapters button[aria-current="true"] { color: var(--text); box-shadow: inset 0 -2px 0 var(--signal); }
+.chapters .t { font: 400 12px/16px var(--mono); color: var(--text-3); }
+.note { font: 400 13px/20px var(--sans); color: var(--text-3); max-width: 720px; margin: 0; }
+
+/* plan */
+.cols { display: flex; flex-wrap: wrap; gap: 48px; margin-top: 40px; }
+.cols > div { flex: 1 1 420px; min-width: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font: 500 12px/16px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); padding: 0 16px 12px 0; border-bottom: 1px solid var(--line-strong); }
+td { padding: 12px 16px 12px 0; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--text-2); }
+td:first-child { color: var(--text); white-space: nowrap; font-weight: 500; }
+td .m { font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--text-2); }
+.list li::before { font: 400 13px/24px var(--mono); flex: none; width: 16px; }
+.list.yes li::before { content: "\2713"; color: var(--signal-text); }
+.list.no li::before { content: "\25CB"; color: var(--text-3); }
+.list b { color: var(--text); font-weight: 500; }
+code { font: 400 13px/20px var(--mono); color: var(--text); background: var(--ink-900); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+details { border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; padding: 16px 0; font-weight: 500; list-style: none; display: flex; justify-content: space-between; gap: 16px; min-height: 44px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; font-family: var(--mono); color: var(--text-3); }
+details[open] summary::after { content: "\2212"; }
+details p { margin: 0 0 16px; color: var(--text-2); max-width: 680px; }
+
+/* form */
+.form-head { display: flex; flex-direction: column; gap: 4px; margin-bottom: 40px; }
+form { display: flex; flex-direction: column; gap: 56px; max-width: 760px; }
+fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.q { display: flex; flex-direction: column; gap: 12px; }
+.q + .q { margin-top: 32px; }
+legend, .qlabel { padding: 0; font: 500 16px/24px var(--sans); color: var(--text); }
+.hint { font: 400 13px/20px var(--sans); color: var(--text-3); margin: -8px 0 0; }
+.sect { font: 500 12px/16px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); padding-bottom: 12px; margin-bottom: 24px; border-bottom: 1px solid var(--line); display: block; width: 100%; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { position: relative; display: inline-flex; }
+.chip input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.chip span { display: inline-flex; align-items: center; min-height: 36px; padding: 6px 14px; border: 1px solid var(--line-strong); border-radius: 8px; background: var(--ink-900); color: var(--text-2); font-size: 14px; line-height: 20px; transition: background 120ms, border-color 120ms, color 120ms; }
+.chip:hover span { border-color: var(--text-3); color: var(--text); }
+.chip input:checked + span { border-color: var(--signal-text); background: var(--signal-12); color: var(--text); }
+.chip input:focus-visible + span { outline: 2px solid var(--signal); outline-offset: 2px; }
+:root[data-theme="light"] .chip input:focus-visible + span { outline-color: #3F6B00; }
+@media (max-width: 640px) { .chip span { min-height: 44px; } }
+input[type=text], input[type=email], textarea { width: 100%; background: var(--ink-900); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 8px 12px; font: 400 15px/24px var(--sans); }
+input[type=text], input[type=email] { height: 36px; }
+@media (max-width: 640px) { input[type=text], input[type=email] { height: 44px; } }
+textarea { min-height: 120px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: var(--text-3); }
+input[type=text]:hover, input[type=email]:hover, textarea:hover { border-color: var(--line-strong); }
+input[type=text]:focus, input[type=email]:focus, textarea:focus { outline: 2px solid var(--signal); outline-offset: 2px; border-color: var(--line-strong); }
+.trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.check { display: flex; align-items: flex-start; gap: 12px; color: var(--text-2); font-size: 14px; }
+.check input { margin-top: 4px; width: 16px; height: 16px; accent-color: #C8FF3D; flex: none; }
+.actions { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.status { font: 400 13px/20px var(--mono); color: var(--text-2); min-height: 20px; }
+.status.err { color: var(--error); }
+.thanks { max-width: 760px; padding: 32px; border: 1px solid var(--signal-text); background: var(--signal-06); border-radius: 12px; }
+.thanks h3 { margin-bottom: 8px; }
+.thanks p { margin: 0; color: var(--text-2); }
+[hidden] { display: none !important; }
+
+footer .wrap { padding-top: 32px; padding-bottom: 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; font: 400 12px/20px var(--mono); color: var(--text-3); }
+footer p { margin: 0; max-width: 640px; }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 80 80">
+    <rect x="0" y="0" width="20" height="20" rx="4" fill="#3A4250"/><rect x="30" y="0" width="20" height="20" rx="4" fill="#3A4250"/><rect x="60" y="0" width="20" height="20" rx="4" fill="#3A4250"/>
+    <rect x="0" y="30" width="20" height="20" rx="4" fill="#3A4250"/><rect x="30" y="30" width="20" height="20" rx="4" fill="#3A4250"/><rect x="60" y="30" width="20" height="20" rx="4" fill="#3A4250"/>
+    <rect x="0" y="60" width="20" height="20" rx="4" fill="#3A4250"/><rect x="30" y="60" width="20" height="20" rx="4" fill="#3A4250"/><rect x="60" y="60" width="20" height="20" rx="4" fill="#C8FF3D"/>
+  </symbol>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="fngrid, back to top">
+      <svg width="24" height="24" aria-hidden="true"><use href="#mark"/></svg>
+      <svg width="84" height="24" viewBox="0 0 348 100" role="img" aria-label="fngrid"><text x="0" y="78" font-family="'Geist Mono', ui-monospace, monospace" font-weight="500" font-size="100" letter-spacing="-2" fill="currentColor">fngr&#305;d</text><rect x="254.5" y="6" width="15" height="15" rx="3" fill="#C8FF3D"/></svg>
+    </a>
+    <nav class="nav-r" aria-label="Page">
+      <a class="l" href="#demo">Demo</a>
+      <a class="l" href="#plan">The plan</a>
+      <button class="icon-btn" id="theme" type="button" aria-label="Switch to light theme" title="Theme">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3"/></svg>
+      </button>
+      <a class="btn btn-primary btn-sm" href="#feedback"><span class="d">Tell us what you'd need</span><span class="m">Feedback</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero" aria-labelledby="h1">
+  <div class="wrap">
+    <div class="badge"><span class="dot" aria-hidden="true">&#9679;</span> concept demo &middot; nothing here is live yet</div>
+    <h1 id="h1">Your agent ships it. And fixes it.</h1>
+    <p class="sub">Deploys in one call. When something breaks, your agent gets the cause, the file and the line.</p>
+    <p class="note">fngrid is an idea we're testing: app hosting that a coding agent can drive end to end. Watch the 75-second walkthrough, then tell us what you'd need.</p>
+    <div class="ctas">
+      <a class="btn btn-primary" href="#feedback">Tell us what you'd need</a>
+      <a class="btn btn-secondary" href="#demo">Watch the demo</a>
+    </div>
+
+    <div class="player" id="demo">
+      <div class="player-h"><span>demo.mp4 &middot; 1:15 &middot; no sound</span><span>simulated</span></div>
+      <video id="vid" controls muted playsinline preload="metadata" poster="assets/poster.jpg" aria-describedby="vid-note">
+        <source src="assets/demo.mp4" type="video/mp4">
+        Your browser can't play this video. The five steps are listed below it.
+      </video>
+      <div class="chapters" role="group" aria-label="Jump to a part of the demo">
+        <button type="button" data-t="0"><span class="t">0:00</span>Deploy</button>
+        <button type="button" data-t="14"><span class="t">0:14</span>Operate</button>
+        <button type="button" data-t="32"><span class="t">0:32</span>Scale</button>
+        <button type="button" data-t="46"><span class="t">0:46</span>Shut down</button>
+        <button type="button" data-t="56"><span class="t">0:56</span>Graduate</button>
+      </div>
+    </div>
+    <p class="note" id="vid-note">The terminals are scripted to show the flow we intend to build. Nothing is deployed yet. Automatic rollback and custom domains are planned, not built.</p>
+  </div>
+</section>
+
+<section aria-labelledby="flow">
+  <div class="wrap sec">
+    <p class="eyebrow">What the demo shows</p>
+    <h2 id="flow">Deploy is the easy part.</h2>
+    <p class="lead">The pain starts once the app is live and something breaks at 3 a.m. So the demo spends most of its time after the deploy.</p>
+    <div class="cols">
+      <div>
+        <ol class="list yes" style="counter-reset: n">
+          <li><span><b>Deploy.</b> One call from your agent to a live URL, and a link for you to keep it.</span></li>
+          <li><span><b>Operate.</b> Errors group into one issue with the cause, the file, the line and the failing request. Your agent fixes it, replays the request on a zero-traffic preview, then promotes it.</span></li>
+        </ol>
+      </div>
+      <div>
+        <ol class="list yes">
+          <li><span><b>Scale.</b> Spin up a pile of small apps. Each has its own URL, and the bill is one line.</span></li>
+          <li><span><b>Shut down.</b> Delete what you don't need. Your agent asks for your approval first.</span></li>
+          <li><span><b>Graduate.</b> Point your own domain at an app, or export one zip with the source, files and a <code>Dockerfile</code>.</span></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="plan" aria-labelledby="plan-h">
+  <div class="wrap sec">
+    <p class="eyebrow">The plan</p>
+    <h2 id="plan-h">$5 a month plus usage. Your credit is the limit.</h2>
+    <p class="lead">A draft, not final. The questions below test whether it's right.</p>
+    <div class="cols">
+      <div>
+        <table>
+          <thead><tr><th scope="col">Item</th><th scope="col">Draft</th></tr></thead>
+          <tbody>
+            <tr><td>Preview</td><td>24 hours, no account. The agent deploys first and you decide later.</td></tr>
+            <tr><td>Keep it</td><td>Add <span class="m">$20</span> of prepaid credit.</td></tr>
+            <tr><td>Base</td><td><span class="m">$5</span>/month per account, 3 apps included.</td></tr>
+            <tr><td>More apps</td><td><span class="m">$1</span>/month each, up to 25.</td></tr>
+            <tr><td>Usage</td><td>Requests, CPU, memory, egress, builds and file storage, taken from your credit.</td></tr>
+            <tr><td>Limit</td><td>Your credit is the hard limit. No surprise bills.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <p class="eyebrow">First version</p>
+        <ul class="list yes">
+          <li><span><b>Node 24 web apps.</b> Express, Hono, Fastify, Next.js standalone.</span></li>
+          <li><span><b>Files and cron.</b> Storage and scheduled jobs included.</span></li>
+          <li><span><b>Logs, env and secrets</b> by API, MCP and CLI. Secret values are never echoed back.</span></li>
+        </ul>
+        <p class="eyebrow" style="margin-top:32px">Not at first</p>
+        <ul class="list no">
+          <li><span><b>Python or Go.</b> Node only.</span></li>
+          <li><span><b>A hosted database.</b> Apps bring their own through env vars.</span></li>
+          <li><span><b>Regions.</b> us-east-1 only.</span></li>
+          <li><span><b>Custom domains.</b> Planned right after launch.</span></li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:56px; max-width: 760px">
+      <details><summary>Is this live?</summary><p>No. This page is a concept demo to find out whether the idea is worth building. The video is scripted.</p></details>
+      <details><summary>Where would it run?</summary><p>On AWS, in us-east-1 for now. Apps would run in our accounts, not yours.</p></details>
+      <details><summary>Can I leave?</summary><p>That is the plan. One call exports your code and files with a <code>Dockerfile</code>. Secret values are not exported, and your database stays with your own provider.</p></details>
+      <details><summary>Why an agent first?</summary><p>Coding agents now build working apps in minutes, but getting one onto a real URL still means a person signing up, wiring env vars and reading a dashboard. We want the agent to do that part, with you approving spend and deletes.</p></details>
+    </div>
+  </div>
+</section>
+
+<section id="feedback" aria-labelledby="fb-h">
+  <div class="wrap sec">
+    <div class="form-head">
+      <p class="eyebrow">Tell us what you'd need</p>
+      <h2 id="fb-h">Does this fix a real problem for you?</h2>
+      <p class="lead">Two minutes. Every question is optional, so skip what doesn't fit. The last box is the one we care about most.</p>
+    </div>
+
+    <form id="form" action="https://formspree.io/f/xgaolbge" method="POST" novalidate>
+      <input type="hidden" name="_subject" value="fngrid interest form">
+      <input type="hidden" name="ref" id="ref" value="">
+      <div class="trap" aria-hidden="true"><label>Leave this empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off"></label></div>
+
+      <div>
+        <span class="sect">01 / You</span>
+
+        <fieldset class="q">
+          <legend>Which agents do you build with?</legend>
+          <p class="hint">Pick any.</p>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="agents" value="Claude Code"><span>Claude Code</span></label>
+            <label class="chip"><input type="checkbox" name="agents" value="Cursor"><span>Cursor</span></label>
+            <label class="chip"><input type="checkbox" name="agents" value="Codex"><span>Codex</span></label>
+            <label class="chip"><input type="checkbox" name="agents" value="Lovable, Bolt or Replit"><span>Lovable, Bolt or Replit</span></label>
+            <label class="chip"><input type="checkbox" name="agents" value="Other"><span>Other</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="q">
+          <legend>Where do your agent-built apps live today?</legend>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="hosting_today" value="Vercel or Netlify"><span>Vercel or Netlify</span></label>
+            <label class="chip"><input type="checkbox" name="hosting_today" value="Cloudflare"><span>Cloudflare</span></label>
+            <label class="chip"><input type="checkbox" name="hosting_today" value="Render, Railway or Fly"><span>Render, Railway or Fly</span></label>
+            <label class="chip"><input type="checkbox" name="hosting_today" value="My own AWS account"><span>My own AWS account</span></label>
+            <label class="chip"><input type="checkbox" name="hosting_today" value="Only on my laptop"><span>Only on my laptop</span></label>
+            <label class="chip"><input type="checkbox" name="hosting_today" value="Other"><span>Other</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="q">
+          <legend>How many apps would you run at once?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="app_count" value="1 to 3"><span>1 to 3</span></label>
+            <label class="chip"><input type="radio" name="app_count" value="4 to 10"><span>4 to 10</span></label>
+            <label class="chip"><input type="radio" name="app_count" value="11 to 25"><span>11 to 25</span></label>
+            <label class="chip"><input type="radio" name="app_count" value="More than 25"><span>More than 25</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="q">
+          <legend>What stops you keeping an agent-built app online?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="blocker" value="Setup and wiring"><span>Setup and wiring</span></label>
+            <label class="chip"><input type="radio" name="blocker" value="Cost surprises"><span>Cost surprises</span></label>
+            <label class="chip"><input type="radio" name="blocker" value="Trusting it with secrets"><span>Trusting it with secrets</span></label>
+            <label class="chip"><input type="radio" name="blocker" value="Fixing it when it breaks"><span>Fixing it when it breaks</span></label>
+            <label class="chip"><input type="radio" name="blocker" value="Not worth keeping"><span>Not worth keeping</span></label>
+            <label class="chip"><input type="radio" name="blocker" value="Nothing, it's fine today"><span>Nothing, it's fine today</span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div>
+        <span class="sect">02 / The idea</span>
+
+        <fieldset class="q">
+          <legend>What would matter most to you?</legend>
+          <p class="hint">Pick up to three.</p>
+          <div class="chips" id="most">
+            <label class="chip"><input type="checkbox" name="matters_most" value="One-call deploy"><span>One-call deploy</span></label>
+            <label class="chip"><input type="checkbox" name="matters_most" value="Cause, file and line when it breaks"><span>Cause, file and line when it breaks</span></label>
+            <label class="chip"><input type="checkbox" name="matters_most" value="Many cheap apps"><span>Many cheap apps</span></label>
+            <label class="chip"><input type="checkbox" name="matters_most" value="Easy shutdown"><span>Easy shutdown</span></label>
+            <label class="chip"><input type="checkbox" name="matters_most" value="Export to my own infra"><span>Export to my own infra</span></label>
+            <label class="chip"><input type="checkbox" name="matters_most" value="Secrets handled safely"><span>Secrets handled safely</span></label>
+            <label class="chip"><input type="checkbox" name="matters_most" value="Hard spend limit"><span>Hard spend limit</span></label>
+            <label class="chip"><input type="checkbox" name="matters_most" value="Activity log of what my agent did"><span>Activity log of what my agent did</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="q">
+          <legend>$5 a month plus usage, 3 apps included, $20 of prepaid credit as your limit. How does that land?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="price_reaction" value="Too high"><span>Too high</span></label>
+            <label class="chip"><input type="radio" name="price_reaction" value="About right"><span>About right</span></label>
+            <label class="chip"><input type="radio" name="price_reaction" value="Cheap"><span>Cheap</span></label>
+            <label class="chip"><input type="radio" name="price_reaction" value="Depends on usage cost"><span>Depends on usage cost</span></label>
+            <label class="chip"><input type="radio" name="price_reaction" value="Prepaid credit is a dealbreaker"><span>Prepaid credit is a dealbreaker</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="q">
+          <legend>Would you let your agent deploy and pay for hosting, within a budget you set?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="agent_pays" value="Yes, within a budget"><span>Yes, within a budget</span></label>
+            <label class="chip"><input type="radio" name="agent_pays" value="Only with my approval each time"><span>Only with my approval each time</span></label>
+            <label class="chip"><input type="radio" name="agent_pays" value="No"><span>No</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="q">
+          <legend>Your agent could deploy a 24-hour preview with no sign-in. Fine, or would you want sign-in first?</legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="anonymous_preview" value="Fine without sign-in"><span>Fine without sign-in</span></label>
+            <label class="chip"><input type="radio" name="anonymous_preview" value="I'd want sign-in"><span>I'd want sign-in</span></label>
+            <label class="chip"><input type="radio" name="anonymous_preview" value="Not sure"><span>Not sure</span></label>
+          </div>
+        </fieldset>
+      </div>
+
+      <div>
+        <span class="sect">03 / What you'd need</span>
+
+        <fieldset class="q">
+          <legend>What would you need on day one?</legend>
+          <p class="hint">We don't host a database, so apps bring their own.</p>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="day_one" value="A database"><span>A database</span></label>
+            <label class="chip"><input type="checkbox" name="day_one" value="Custom domain"><span>Custom domain</span></label>
+            <label class="chip"><input type="checkbox" name="day_one" value="Python or Go"><span>Python or Go</span></label>
+            <label class="chip"><input type="checkbox" name="day_one" value="Next.js middleware or ISR"><span>Next.js middleware or ISR</span></label>
+            <label class="chip"><input type="checkbox" name="day_one" value="Staging and production"><span>Staging and production</span></label>
+            <label class="chip"><input type="checkbox" name="day_one" value="Team access"><span>Team access</span></label>
+            <label class="chip"><input type="checkbox" name="day_one" value="Backups"><span>Backups</span></label>
+          </div>
+        </fieldset>
+
+        <div class="q">
+          <label class="qlabel" for="database_which">Which database do you use, if any?</label>
+          <input type="text" id="database_which" name="database_which" placeholder="Postgres on Neon, Supabase, SQLite, none">
+        </div>
+
+        <div class="q">
+          <label class="qlabel" for="production">When an app gets serious, what does "ready for production" mean to you?</label>
+          <p class="hint">Domains, environments, monitoring, taking it elsewhere, anything.</p>
+          <textarea id="production" name="production_means"></textarea>
+        </div>
+
+        <div class="q">
+          <label class="qlabel" for="wants">What would you need or want from a platform like this?</label>
+          <p class="hint">Anything. A deal-breaker, a feature, a thing that annoys you about hosting today.</p>
+          <textarea id="wants" name="wants"></textarea>
+        </div>
+      </div>
+
+      <div>
+        <span class="sect">04 / Stay in touch</span>
+        <div class="q">
+          <label class="qlabel" for="email">Email</label>
+          <p class="hint">Optional. Only if you're happy for us to write back.</p>
+          <input type="email" id="email" name="email" autocomplete="email" placeholder="you@example.com">
+        </div>
+        <div class="q">
+          <label class="check"><input type="checkbox" name="follow_up" value="yes"><span>You can email me follow-up questions, and tell me if this gets built.</span></label>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" id="send">Send my answers</button>
+        <span class="status" id="status" role="status" aria-live="polite"></span>
+      </div>
+    </form>
+
+    <div class="thanks" id="thanks" hidden tabindex="-1">
+      <h3>Got it. Thank you.</h3>
+      <p>Your answers are with us. If you left an email, we'll write once to follow up, and only then.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>fngrid &middot; concept demo, not a live service. Answers are sent through Formspree to the fngrid team and used only to decide what to build. Nothing here is a promise of features, pricing or dates.</p>
+    <span>fngrid.github.io</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+
+  // theme
+  var btn = document.getElementById('theme');
+  function syncTheme() {
+    var light = root.getAttribute('data-theme') === 'light';
+    btn.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+  }
+  btn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem('fngrid-theme', next); } catch (e) {}
+    syncTheme();
+  });
+  syncTheme();
+
+  // video chapters
+  var vid = document.getElementById('vid');
+  var chapters = Array.prototype.slice.call(document.querySelectorAll('.chapters button'));
+  chapters.forEach(function (b) {
+    b.addEventListener('click', function () {
+      vid.currentTime = Number(b.getAttribute('data-t'));
+      var p = vid.play(); if (p && p.catch) p.catch(function () {});
+    });
+  });
+  function markChapter() {
+    var t = vid.currentTime, cur = 0;
+    chapters.forEach(function (b, i) { if (t >= Number(b.getAttribute('data-t'))) cur = i; });
+    chapters.forEach(function (b, i) { if (i === cur) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current'); });
+  }
+  vid.addEventListener('timeupdate', markChapter);
+  markChapter();
+
+  // which friend group sent this link: ?ref=name
+  var refEl = document.getElementById('ref');
+  try { refEl.value = (new URLSearchParams(location.search).get('ref') || '').slice(0, 60); } catch (e) {}
+
+  // pick up to three
+  var most = document.getElementById('most');
+  most.addEventListener('change', function (e) {
+    var boxes = most.querySelectorAll('input:checked');
+    if (boxes.length > 3) { e.target.checked = false; }
+  });
+
+  // submit
+  var form = document.getElementById('form');
+  var send = document.getElementById('send');
+  var status = document.getElementById('status');
+  var thanks = document.getElementById('thanks');
+
+  function setStatus(msg, isErr) { status.textContent = msg; status.className = 'status' + (isErr ? ' err' : ''); }
+
+  function hasAnswer(fd) {
+    var any = false;
+    fd.forEach(function (v, k) {
+      if (k === '_subject' || k === 'ref' || k === '_gotcha' || k === 'follow_up') return;
+      if (String(v).trim() !== '') any = true;
+    });
+    return any;
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var fd = new FormData(form);
+    if (!hasAnswer(fd)) { setStatus('Answer at least one question first.', true); return; }
+    send.disabled = true; setStatus('Sending...', false);
+    fetch(form.action, { method: 'POST', body: fd, headers: { 'Accept': 'application/json' } })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, body: j }; }); })
+      .then(function (res) {
+        if (res.ok) {
+          form.hidden = true; thanks.hidden = false; thanks.focus();
+          thanks.scrollIntoView({ block: 'center' });
+        } else {
+          var m = res.body && res.body.errors && res.body.errors.map(function (x) { return x.message; }).join(' ');
+          setStatus((m || 'That did not send.') + ' Try again in a moment.', true);
+          send.disabled = false;
+        }
+      })
+      .catch(function () { setStatus('Could not reach the form service. Check your connection and try again.', true); send.disabled = false; });
+  });
+})();
+</script>
+</body>
+</html>
